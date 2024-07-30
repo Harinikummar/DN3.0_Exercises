@@ -1,0 +1,35 @@
+Financial Forecasting
+
+1. Explain the concept of recursion and how it can simplify certain problems.
+
+Recursion is a technique where a function calls itself to solve a problem. It breaks down a problem into smaller, simpler versions of the same problem.
+
+How It Simplifies Problems:
+Breaks Down Complex Problems: Recursion simplifies complex problems by breaking them into smaller, more manageable pieces.
+Clear and Concise Code: It often leads to more straightforward and easier-to-understand code, especially for problems with repetitive or nested structures.
+Natural Fit for Some Problems: For problems like calculating factorials, navigating tree structures, or solving puzzles, recursion can be a better solution.
+
+2. Discuss the time complexity of your recursive algorithm.
+
+For the recursive algorithm to calculate the future value:
+Time Complexity: O(n)
+Explanation: The algorithm makes one recursive call for each period. If there are 𝑛 periods, the function is called 𝑛 times. Each call performs a constant amount of work, so the total time increases linearly with the number of periods.
+
+
+3. Explain how to optimize the recursive solution to avoid excessive computation.
+
+(i)Memoization:
+Definition: Store the results of previous calculations to avoid repeating them.
+Benefit: Saves time by reusing results rather than recalculating.
+
+(ii)Iteration:
+Definition: Convert the recursive approach to use loops instead.
+Benefit: Can be more efficient and avoids problems like stack overflow for deep recursion.
+
+(iii)Tabulation:
+Definition: Solve smaller sub-problems first and build up to the original problem using a table.
+Benefit: Avoids redundant calculations by solving each sub-problem once and storing the results.
+
+(iv)Dynamic Programming (DP):
+Definition: A method that combines memoization and tabulation to solve problems by breaking them into simpler sub-problems and storing results to avoid redundant work.
+Benefit: Improves efficiency by reusing solutions to sub-problems and is useful for optimization problems.

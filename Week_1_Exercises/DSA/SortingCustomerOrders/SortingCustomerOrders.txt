@@ -1,0 +1,36 @@
+Sorting Customer Orders
+
+1. Explain different sorting algorithms (Bubble Sort, Insertion Sort, Quick Sort, Merge Sort).
+
+(i)Bubble Sort:
+Compares each pair of adjacent elements and swaps them if they are in the wrong order. This process is repeated until the list is sorted.
+Time Complexity: O(n^2) - takes a lot of time for large lists.
+
+(ii)Insertion Sort:
+Builds the sorted list one element at a time by repeatedly picking the next element and inserting it into its correct position in the already sorted part.
+Time Complexity: O(n^2) - suitable for small or nearly sorted lists.
+
+(iii)Quick Sort:
+Uses a divide-and-conquer strategy by selecting a 'pivot' element, partitioning the array into elements less than the pivot and greater than the pivot, and then recursively sorting the partitions.
+Time Complexity: Average case O(n log n), but worst case O(n^2) - generally very fast.
+
+(iv)Merge Sort:
+Also uses a divide-and-conquer approach by splitting the array into halves, recursively sorting each half, and then merging the sorted halves.
+Time Complexity: O(n log n) - consistently efficient and stable.
+
+
+2. Compare the performance (time complexity) of Bubble Sort and Quick Sort.
+
+(i)Bubble Sort:
+Time Complexity: O(n^2)
+Performance: Slow for large lists because it repeatedly compares and swaps adjacent elements.
+
+(ii)Quick Sort:
+Time Complexity: Average case O(n log n), worst case O(n^2)
+Performance: Generally much faster than Bubble Sort for large lists due to its divide-and-conquer strategy, though it can be slow in the worst case.
+
+3. Discuss why Quick Sort is generally preferred over Bubble Sort.
+
+Speed: Quick Sort, with an average time complexity of O(n log n), is significantly faster than Bubble Sort’s O(n^2), especially for large datasets.
+Efficiency: Quick Sort efficiently partitions the array, reducing the number of comparisons and swaps needed to sort the elements.
+Scalability: Quick Sort handles large lists better than Bubble Sort.

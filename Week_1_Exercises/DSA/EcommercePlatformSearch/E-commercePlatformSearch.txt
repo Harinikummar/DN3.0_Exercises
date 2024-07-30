@@ -1,0 +1,48 @@
+E-commerce Platform Search
+
+1. Explain Big O notation and how it helps in analyzing algorithms.
+
+Big O Notation is a mathematical notation used to describe the upper bound of an algorithm's running time or space requirements in terms of the size of the input data. It describes the worst-case scenario for an algorithm's performance, making it easier to compare the efficiency of different algorithms.
+
+For example:
+O(1): Constant time, doesn't change with input size.
+O(n): Linear time, grows proportionally with input size.
+O(n^2): Quadratic time, grows with the square of the input size.
+
+2. Describe the best, average, and worst-case scenarios for search operations.
+
+Best Case: The search finds the element immediately, ie Minimum number of steps.
+
+Average Case: The search takes a typical number of steps to find the element.
+
+Worst Case: The search takes the maximum number of steps, often when the element is not present.
+
+
+3. Describe the best, average, and worst-case scenarios for search operations.
+
+(i)Linear Search:
+Best Case: The target element is the first element in the array.
+Time Complexity: O(1)
+
+Average Case: The target element is somewhere in the middle of the array.
+Time Complexity: O(n/2), simplified to O(n)
+
+Worst Case: The target element is the last element or not present in the array.
+Time Complexity: O(n)
+
+(ii)Binary Search:
+Best Case: The target element is the middle element of the sorted array.
+Time Complexity: O(1)
+
+Average Case: The target element is in the array, requiring several comparisons.
+Time Complexity: O(log n)
+
+Worst Case: The target element is not present in the array.
+Time Complexity: O(log n)
+
+
+4. Discuss which algorithm is more suitable for your platform and why.
+
+Linear Search is suitable for small or unsorted lists because it's simple and doesn’t require sorting.
+Binary Search is better for large, sorted lists because it’s faster, reducing the number of checks needed.
+For an e-commerce platform with many products, Binary Search is generally more suitable due to its efficiency with large, sorted data.
