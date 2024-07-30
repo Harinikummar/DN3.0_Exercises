@@ -1,0 +1,43 @@
+Employee Management System
+
+1. Explain how arrays are represented in memory and their advantages.
+
+Representation:
+Contiguous Memory: Arrays are stored in contiguous (side-by-side) memory locations.
+Indexing: Each element in the array is accessed using an index, starting from 0.
+
+Advantages:
+Fast Access: You can quickly access any element using its index.
+Fixed Size: The size of the array is set when it is created, making memory management predictable.
+Simple Traversal: Easy to loop through the array elements using indices.
+
+
+2. Analyze the time complexity of each operation (add, search, traverse, delete).
+
+Add (at the end):
+Time Complexity: O(1)
+Explanation: Adding an element at the end of the array is very fast because it doesn't involve shifting other elements.
+
+Search:
+Time Complexity: O(n)
+Explanation: To find an element, you might have to look at each element one by one until you find the one you're looking for.
+
+Traverse:
+Time Complexity: O(n)
+Explanation: To go through all the elements in the array, you need to check each element, one after the other.
+
+Delete:
+Time Complexity: O(n)
+Explanation: To delete an element, you might need to shift other elements to fill the gap, which can be slow if the array is large.
+
+3. Discuss the limitations of arrays and when to use them.
+
+Limitations of Arrays:
+Fixed Size: Once an array is created, its size cannot be changed. This can lead to wasted space if the array is too large or insufficient space if it's too small.
+Inefficient Insertions/Deletions: Adding or removing elements in the middle requires shifting other elements, which can be slow.
+Memory Waste: If the array is not fully used, the unused space still occupies memory.
+
+When to Use Arrays:
+Fixed Number of Elements: When you know the number of elements in advance and it won't change.
+Fast Access: When you need quick access to elements using an index.
+Simple Data Structures: For straightforward data storage where dynamic resizing is not needed.
