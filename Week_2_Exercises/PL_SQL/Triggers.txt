@@ -1,0 +1,77 @@
+Scenario 1:
+Write a trigger UpdateCustomerLastModified that updates the LastModified column of the Customers table to the current date whenever a customer's record is updated.
+
+CREATE OR REPLACE TRIGGER UpdateCustomerLastModified
+BEFORE UPDATE ON Customers
+FOR EACH ROW
+BEGIN
+    :NEW.LastModified := SYSDATE;
+END UpdateCustomerLastModified;
+
+
+Scenario 2:
+Write a trigger LogTransaction that inserts a record into an AuditLog table whenever a transaction is inserted into the Transactions table.
+
+CREATE TABLE AuditLog (
+    AuditID NUMBER PRIMARY KEY,
+    TransactionID NUMBER,
+    AccountID NUMBER,
+    TransactionDate DATE,
+    Amount NUMBER,
+    TransactionType VARCHAR2(10),
+    AuditTimestamp DATE
+);
+
+CREATE OR REPLACE TRIGGER LogTransaction
+AFTER INSERT ON Transactions
+FOR EACH ROW
+BEGIN
+    INSERT INTO AuditLog (
+        AuditID,
+        TransactionID,
+        AccountID,
+        TransactionDate,
+        Amount,
+        TransactionType,
+        AuditTimestamp
+    ) VALUES (
+        AuditLog_SEQ.NEXTVAL,
+        :NEW.TransactionID,
+        :NEW.AccountID,
+        :NEW.TransactionDate,
+        :NEW.Amount,
+        :NEW.TransactionType,
+        SYSDATE
+    );
+END LogTransaction;
+
+CREATE SEQUENCE AuditLog_SEQ
+START WITH 1
+INCREMENT BY 1;
+
+
+Scenario 3:
+Write a trigger CheckTransactionRules that ensures withdrawals do not exceed the balance and deposits are positive before inserting a record into the Transactions table.
+
+CREATE OR REPLACE TRIGGER CheckTransactionRules
+BEFORE INSERT ON Transactions
+FOR EACH ROW
+DECLARE
+    l_balance NUMBER;
+BEGIN
+    -- Retrieve the balance of the account
+    SELECT Balance INTO l_balance
+    FROM Accounts
+    WHERE AccountID = :NEW.AccountID
+    FOR UPDATE;
+
+    -- Ensure deposits are positive
+    IF :NEW.TransactionType = 'Deposit' AND :NEW.Amount <= 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Deposit amount must be positive.');
+    END IF;
+
+    -- Ensure withdrawals do not exceed the balance
+    IF :NEW.TransactionType = 'Withdrawal' AND :NEW.Amount > l_balance THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Insufficient balance for withdrawal.');
+    END IF;
+END CheckTransactionRules;

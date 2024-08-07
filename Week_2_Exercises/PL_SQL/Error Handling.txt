@@ -1,0 +1,111 @@
+Scenario 1:
+Write a stored procedure SafeTransferFunds that transfers funds between two accounts. Ensure that if any error occurs (e.g., insufficient funds), an appropriate error message is logged and the transaction is rolled back.
+
+CREATE OR REPLACE PROCEDURE SafeTransferFunds(
+    p_from_account_id IN NUMBER,
+    p_to_account_id IN NUMBER,
+    p_amount IN NUMBER
+) AS
+    insufficient_funds EXCEPTION;
+    no_account_found EXCEPTION;
+    l_from_balance NUMBER;
+    l_to_balance NUMBER;
+BEGIN
+    -- Retrieve the balance of the source account
+    SELECT Balance INTO l_from_balance
+    FROM Accounts
+    WHERE AccountID = p_from_account_id
+    FOR UPDATE;
+    
+    -- Check if the source account has sufficient funds
+    IF l_from_balance < p_amount THEN
+        RAISE insufficient_funds;
+    END IF;
+    
+    -- Retrieve the balance of the destination account
+    SELECT Balance INTO l_to_balance
+    FROM Accounts
+    WHERE AccountID = p_to_account_id
+    FOR UPDATE;
+    
+    -- Deduct the amount from the source account
+    UPDATE Accounts
+    SET Balance = Balance - p_amount
+    WHERE AccountID = p_from_account_id;
+    
+    -- Add the amount to the destination account
+    UPDATE Accounts
+    SET Balance = Balance + p_amount
+    WHERE AccountID = p_to_account_id;
+    
+    COMMIT;
+    
+EXCEPTION
+    WHEN insufficient_funds THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error: Insufficient funds in the source account.');
+    WHEN NO_DATA_FOUND THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error: One of the accounts does not exist.');
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END SafeTransferFunds;
+
+
+Scenario 2:
+Write a stored procedure UpdateSalary that increases the salary of an employee by a given percentage. If the employee ID does not exist, handle the exception and log an error message.
+
+CREATE OR REPLACE PROCEDURE UpdateSalary(
+    p_employee_id IN NUMBER,
+    p_percentage IN NUMBER
+) AS
+    employee_not_found EXCEPTION;
+BEGIN
+    -- Update the employee's salary
+    UPDATE Employees
+    SET Salary = Salary + (Salary * p_percentage / 100)
+    WHERE EmployeeID = p_employee_id;
+    
+    IF SQL%NOTFOUND THEN
+        RAISE employee_not_found;
+    END IF;
+    
+    COMMIT;
+    
+EXCEPTION
+    WHEN employee_not_found THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error: Employee with ID ' || p_employee_id || ' does not exist.');
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END UpdateSalary;
+
+
+Scenario 3:
+Write a stored procedure AddNewCustomer that inserts a new customer into the Customers table. If a customer with the same ID already exists, handle the exception by logging an error and preventing the insertion.
+
+CREATE OR REPLACE PROCEDURE AddNewCustomer(
+    p_customer_id IN NUMBER,
+    p_name IN VARCHAR2,
+    p_dob IN DATE,
+    p_balance IN NUMBER
+) AS
+    customer_exists EXCEPTION;
+BEGIN
+    -- Insert a new customer
+    INSERT INTO Customers (CustomerID, Name, DOB, Balance, LastModified)
+    VALUES (p_customer_id, p_name, p_dob, p_balance, SYSDATE);
+    
+    COMMIT;
+    
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error: Customer with ID ' || p_customer_id || ' already exists.');
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END AddNewCustomer;
+

@@ -1,0 +1,183 @@
+Scenario 1:
+Create a package CustomerManagement with procedures for adding a new customer, updating customer details, and a function to get customer balance.
+
+CREATE OR REPLACE PACKAGE CustomerManagement IS
+    PROCEDURE AddNewCustomer(
+        p_customer_id IN Customers.CustomerID%TYPE,
+        p_name IN Customers.Name%TYPE,
+        p_dob IN Customers.DOB%TYPE,
+        p_balance IN Customers.Balance%TYPE
+    );
+
+    PROCEDURE UpdateCustomerDetails(
+        p_customer_id IN Customers.CustomerID%TYPE,
+        p_name IN Customers.Name%TYPE,
+        p_dob IN Customers.DOB%TYPE,
+        p_balance IN Customers.Balance%TYPE
+    );
+
+    FUNCTION GetCustomerBalance(
+        p_customer_id IN Customers.CustomerID%TYPE
+    ) RETURN NUMBER;
+END CustomerManagement;
+
+CREATE OR REPLACE PACKAGE BODY CustomerManagement IS
+    PROCEDURE AddNewCustomer(
+        p_customer_id IN Customers.CustomerID%TYPE,
+        p_name IN Customers.Name%TYPE,
+        p_dob IN Customers.DOB%TYPE,
+        p_balance IN Customers.Balance%TYPE
+    ) IS
+    BEGIN
+        INSERT INTO Customers (CustomerID, Name, DOB, Balance, LastModified)
+        VALUES (p_customer_id, p_name, p_dob, p_balance, SYSDATE);
+    END AddNewCustomer;
+
+    PROCEDURE UpdateCustomerDetails(
+        p_customer_id IN Customers.CustomerID%TYPE,
+        p_name IN Customers.Name%TYPE,
+        p_dob IN Customers.DOB%TYPE,
+        p_balance IN Customers.Balance%TYPE
+    ) IS
+    BEGIN
+        UPDATE Customers
+        SET Name = p_name,
+            DOB = p_dob,
+            Balance = p_balance,
+            LastModified = SYSDATE
+        WHERE CustomerID = p_customer_id;
+    END UpdateCustomerDetails;
+
+    FUNCTION GetCustomerBalance(
+        p_customer_id IN Customers.CustomerID%TYPE
+    ) RETURN NUMBER IS
+        l_balance NUMBER;
+    BEGIN
+        SELECT Balance INTO l_balance
+        FROM Customers
+        WHERE CustomerID = p_customer_id;
+        RETURN l_balance;
+    END GetCustomerBalance;
+END CustomerManagement;
+
+
+Scenario 2:
+Write a package EmployeeManagement with procedures to hire new employees, update employee details, and a function to calculate annual salary.
+
+CREATE OR REPLACE PACKAGE EmployeeManagement IS
+    PROCEDURE HireNewEmployee(
+        p_employee_id IN Employees.EmployeeID%TYPE,
+        p_name IN Employees.Name%TYPE,
+        p_position IN Employees.Position%TYPE,
+        p_salary IN Employees.Salary%TYPE,
+        p_department IN Employees.Department%TYPE,
+        p_hire_date IN Employees.HireDate%TYPE
+    );
+
+    PROCEDURE UpdateEmployeeDetails(
+        p_employee_id IN Employees.EmployeeID%TYPE,
+        p_name IN Employees.Name%TYPE,
+        p_position IN Employees.Position%TYPE,
+        p_salary IN Employees.Salary%TYPE,
+        p_department IN Employees.Department%TYPE
+    );
+
+    FUNCTION CalculateAnnualSalary(
+        p_employee_id IN Employees.EmployeeID%TYPE
+    ) RETURN NUMBER;
+END EmployeeManagement;
+
+CREATE OR REPLACE PACKAGE BODY EmployeeManagement IS
+    PROCEDURE HireNewEmployee(
+        p_employee_id IN Employees.EmployeeID%TYPE,
+        p_name IN Employees.Name%TYPE,
+        p_position IN Employees.Position%TYPE,
+        p_salary IN Employees.Salary%TYPE,
+        p_department IN Employees.Department%TYPE,
+        p_hire_date IN Employees.HireDate%TYPE
+    ) IS
+    BEGIN
+        INSERT INTO Employees (EmployeeID, Name, Position, Salary, Department, HireDate)
+        VALUES (p_employee_id, p_name, p_position, p_salary, p_department, p_hire_date);
+    END HireNewEmployee;
+
+    PROCEDURE UpdateEmployeeDetails(
+        p_employee_id IN Employees.EmployeeID%TYPE,
+        p_name IN Employees.Name%TYPE,
+        p_position IN Employees.Position%TYPE,
+        p_salary IN Employees.Salary%TYPE,
+        p_department IN Employees.Department%TYPE
+    ) IS
+    BEGIN
+        UPDATE Employees
+        SET Name = p_name,
+            Position = p_position,
+            Salary = p_salary,
+            Department = p_department
+        WHERE EmployeeID = p_employee_id;
+    END UpdateEmployeeDetails;
+
+    FUNCTION CalculateAnnualSalary(
+        p_employee_id IN Employees.EmployeeID%TYPE
+    ) RETURN NUMBER IS
+        l_annual_salary NUMBER;
+    BEGIN
+        SELECT Salary * 12 INTO l_annual_salary
+        FROM Employees
+        WHERE EmployeeID = p_employee_id;
+        RETURN l_annual_salary;
+    END CalculateAnnualSalary;
+END EmployeeManagement;
+
+
+Scenario 3:
+Create a package AccountOperations with procedures for opening a new account, closing an account, and a function to get the total balance of a customer across all accounts.
+
+CREATE OR REPLACE PACKAGE AccountOperations IS
+    PROCEDURE OpenNewAccount(
+        p_account_id IN Accounts.AccountID%TYPE,
+        p_customer_id IN Accounts.CustomerID%TYPE,
+        p_account_type IN Accounts.AccountType%TYPE,
+        p_balance IN Accounts.Balance%TYPE
+    );
+
+    PROCEDURE CloseAccount(
+        p_account_id IN Accounts.AccountID%TYPE
+    );
+
+    FUNCTION GetTotalBalance(
+        p_customer_id IN Accounts.CustomerID%TYPE
+    ) RETURN NUMBER;
+END AccountOperations;
+
+CREATE OR REPLACE PACKAGE BODY AccountOperations IS
+    PROCEDURE OpenNewAccount(
+        p_account_id IN Accounts.AccountID%TYPE,
+        p_customer_id IN Accounts.CustomerID%TYPE,
+        p_account_type IN Accounts.AccountType%TYPE,
+        p_balance IN Accounts.Balance%TYPE
+    ) IS
+    BEGIN
+        INSERT INTO Accounts (AccountID, CustomerID, AccountType, Balance, LastModified)
+        VALUES (p_account_id, p_customer_id, p_account_type, p_balance, SYSDATE);
+    END OpenNewAccount;
+
+    PROCEDURE CloseAccount(
+        p_account_id IN Accounts.AccountID%TYPE
+    ) IS
+    BEGIN
+        DELETE FROM Accounts
+        WHERE AccountID = p_account_id;
+    END CloseAccount;
+
+    FUNCTION GetTotalBalance(
+        p_customer_id IN Accounts.CustomerID%TYPE
+    ) RETURN NUMBER IS
+        l_total_balance NUMBER;
+    BEGIN
+        SELECT SUM(Balance) INTO l_total_balance
+        FROM Accounts
+        WHERE CustomerID = p_customer_id;
+        RETURN l_total_balance;
+    END GetTotalBalance;
+END AccountOperations;

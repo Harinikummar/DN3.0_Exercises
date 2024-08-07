@@ -1,0 +1,65 @@
+Scenario 1:
+Write a function CalculateAge that takes a customer's date of birth as input and returns their age in years.
+
+CREATE OR REPLACE FUNCTION CalculateAge(
+    p_dob DATE
+) RETURN NUMBER IS
+    l_age NUMBER;
+BEGIN
+    l_age := FLOOR(MONTHS_BETWEEN(SYSDATE, p_dob) / 12);
+    RETURN l_age;
+END CalculateAge;
+
+
+Scenario 2:
+Write a function CalculateMonthlyInstallment that takes the loan amount, interest rate, and loan duration in years as input and returns the monthly installment amount.
+
+CREATE OR REPLACE FUNCTION CalculateMonthlyInstallment(
+    p_loan_amount NUMBER,
+    p_interest_rate NUMBER,
+    p_duration_years NUMBER
+) RETURN NUMBER IS
+    l_monthly_rate NUMBER;
+    l_monthly_installment NUMBER;
+    l_total_months NUMBER;
+BEGIN
+    l_monthly_rate := p_interest_rate / 12 / 100;
+    l_total_months := p_duration_years * 12;
+
+    IF l_monthly_rate = 0 THEN
+        l_monthly_installment := p_loan_amount / l_total_months;
+    ELSE
+        l_monthly_installment := p_loan_amount * l_monthly_rate / 
+                                 (1 - POWER(1 + l_monthly_rate, -l_total_months));
+    END IF;
+
+    RETURN l_monthly_installment;
+END CalculateMonthlyInstallment;
+
+
+Scenario 3:
+Write a function HasSufficientBalance that takes an account ID and an amount as input and returns a boolean indicating whether the account has at least the specified amount.
+
+CREATE OR REPLACE FUNCTION HasSufficientBalance(
+    p_account_id NUMBER,
+    p_amount NUMBER
+) RETURN BOOLEAN IS
+    l_balance NUMBER;
+BEGIN
+    -- Retrieve the balance of the account
+    SELECT Balance INTO l_balance
+    FROM Accounts
+    WHERE AccountID = p_account_id;
+
+    -- Check if the balance is sufficient
+    IF l_balance >= p_amount THEN
+        RETURN TRUE;
+    ELSE
+        RETURN FALSE;
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN FALSE;
+    WHEN OTHERS THEN
+        RETURN FALSE;
+END HasSufficientBalance;
