@@ -1,0 +1,82 @@
+Exercise 8: Employee Management System - Creating Projections
+
+EmployeeNameEmailProjection (Interface based):
+
+package com.example.EmployeeManagementSystem.projection;
+
+public interface EmployeeNameEmailProjection {
+
+    String getName();
+
+    String getEmail();
+
+    String getDepartmentName();
+}
+
+
+EmployeeRepository:
+
+package com.example.EmployeeManagementSystem.repository;
+
+import com.example.EmployeeManagementSystem.Entity.Employee;
+import com.example.EmployeeManagementSystem.dto.EmployeeDTO;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+	
+    @Query("SELECT e.name AS name, e.email AS email, d.name AS departmentName FROM Employee e JOIN e.department d")
+    List<EmployeeNameEmailProjection> findEmployeeNameAndEmailWithDepartment();	
+
+    @Query("SELECT new com.example.EmployeeManagementSystem.dto.EmployeeDTO(e.name, e.email, d.name) FROM Employee e JOIN e.department d")
+    List<EmployeeDTO> findEmployeeDTOs();
+}
+
+
+EmployeeDTO (Class based): 
+
+package com.example.EmployeeManagementSystem.dto;
+
+public class EmployeeDTO {
+
+    private String name;
+    private String email;
+    private String departmentName;
+
+    public EmployeeDTO(String name, String email, String departmentName) {
+        this.name = name;
+        this.email = email;
+        this.departmentName = departmentName;
+    }
+}
+
+EmployeeController:
+
+package com.example.EmployeeManagementSystem.controller;
+
+import com.example.EmployeeManagementSystem.projection.EmployeeNameEmailProjection;
+import com.example.EmployeeManagementSystem.repository.EmployeeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @GetMapping("/employees/dto")
+    public List<EmployeeDTO> getEmployeeDTOs() {
+        return employeeRepository.findEmployeeDTOs();
+    }
+
+    @GetMapping("/employees/projection")
+    public List<EmployeeNameEmailProjection> getEmployeeProjections() {
+        return employeeRepository.findEmployeeNameAndEmailWithDepartment();
+    }
+}

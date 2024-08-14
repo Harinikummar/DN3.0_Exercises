@@ -1,0 +1,70 @@
+Exercise 5: Employee Management System - Defining Query Methods
+
+EmployeeRepository
+
+package com.example.EmployeeManagementSystem.repository;
+
+import com.example.EmployeeManagementSystem.Entity.Employee;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+    List<Employee> findByName(String name);
+
+    List<Employee> findByDepartmentId(Long departmentId);
+
+    @Query("SELECT e FROM Employee e WHERE e.name = :name AND e.email = :email")
+    List<Employee> findByNameAndEmail(@Param("name") String name, @Param("email") String email);
+
+    @Query(value = "SELECT * FROM Employee e JOIN Department d ON e.department_id = d.id WHERE d.name = :deptName", nativeQuery = true)
+    List<Employee> findByDepartmentName(@Param("deptName") String deptName);
+}
+
+
+Named Queries:
+
+@Entity
+@NamedQueries({
+        @NamedQuery(name = "Employee.findByEmailNamedQuery",
+                query = "SELECT e FROM Employee e WHERE e.email = :email"),
+        @NamedQuery(name = "Employee.findByDepartmentNameNamedQuery",
+                query = "SELECT e FROM Employee e JOIN e.department d WHERE d.name = :deptName")
+})
+
+
+DepartmentRepository:
+
+package com.example.EmployeeManagementSystem.repository;
+
+import com.example.EmployeeManagementSystem.Entity.Department;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface DepartmentRepository extends JpaRepository<Department, Long> {
+
+    Department findByName(String name);
+
+    @Query("SELECT d FROM Department d WHERE LOWER(d.name) = LOWER(:name)")
+    Department findByNameIgnoreCase(@Param("name") String name);
+
+    @Query(value = "SELECT * FROM Department d WHERE d.name LIKE :letter%", nativeQuery = true)
+    List<Department> findDepartmentsStartingWith(@Param("letter") String letter);
+}
+
+
+Named Queries:
+
+@Entity
+@NamedQueries({
+        @NamedQuery(name = "Department.findByNameNamedQuery",
+                query = "SELECT d FROM Department d WHERE d.name = :name"),
+        @NamedQuery(name = "Department.findByPartialNameNamedQuery",
+                query = "SELECT d FROM Department d WHERE d.name LIKE :partialName")
+})

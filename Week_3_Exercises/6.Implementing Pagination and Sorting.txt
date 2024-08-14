@@ -1,0 +1,82 @@
+Exercise 6: Employee Management System - Implementing Pagination and Sorting
+
+EmployeeRepository:
+
+package com.example.EmployeeManagementSystem.repository;
+
+import com.example.EmployeeManagementSystem.Entity.Employee;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+import java.util.List;
+
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+    Page<Employee> findAll(Pageable pageable);
+
+    List<Employee> findAll(Sort sort);
+
+    Page<Employee> findByDepartmentId(Long departmentId, Pageable pageable);
+}
+
+
+EmployeeController:
+
+package com.example.EmployeeManagementSystem.controller;
+
+import com.example.EmployeeManagementSystem.Entity.Employee;
+import com.example.EmployeeManagementSystem.repository.EmployeeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/employees")
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @GetMapping("/paginated")
+    public ResponseEntity<Page<Employee>> getEmployeesPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Employee> employeesPage = employeeRepository.findAll(pageable);
+
+        return ResponseEntity.ok(employeesPage);
+    }
+
+    @GetMapping("/sorted")
+    public ResponseEntity<List<Employee>> getEmployeesSorted(
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        List<Employee> employees = employeeRepository.findAll(sort);
+
+        return ResponseEntity.ok(employees);
+    }
+
+    @GetMapping("/paginated-and-sorted")
+    public ResponseEntity<Page<Employee>> getEmployeesPaginatedAndSorted(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
+        Page<Employee> employeesPage = employeeRepository.findAll(pageable);
+
+        return ResponseEntity.ok(employeesPage);
+    }
+}

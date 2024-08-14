@@ -1,0 +1,112 @@
+Exercise 10: Employee Management System - Hibernate-Specific Features
+
+application.properties:
+
+spring.application.name=EmployeeManagementSystem
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+
+spring.jpa.properties.hibernate.show_sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.hbm2ddl.auto=update
+
+spring.jpa.properties.hibernate.cache.use_second_level_cache=true
+spring.jpa.properties.hibernate.cache.region.factory_class=org.hibernate.cache.jcache.JCacheRegionFactory
+spring.jpa.properties.javax.cache.provider=org.ehcache.jsr107.EhcacheCachingProvider
+
+spring.jpa.properties.hibernate.jdbc.batch_size=20
+spring.jpa.properties.hibernate.order_inserts=true
+spring.jpa.properties.hibernate.order_updates=true
+
+spring.jpa.properties.hibernate.jdbc.batch_size=20
+spring.jpa.properties.hibernate.order_inserts=true
+spring.jpa.properties.hibernate.order_updates=true
+
+
+
+Employee Entity:
+
+package com.example.EmployeeManagementSystem.Entity;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.SelectBeforeUpdate;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@DynamicInsert
+@DynamicUpdate
+@SelectBeforeUpdate
+public class Employee {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @Column(unique = true)
+    private String email;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    private LocalDateTime lastModifiedDate;
+}
+
+
+EmployeeService:
+
+package com.example.EmployeeManagementSystem;
+
+import com.example.EmployeeManagementSystem.Entity.Employee;
+import com.example.EmployeeManagementSystem.repository.EmployeeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class EmployeeService {
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Transactional
+    public void saveEmployeesInBatch(List<Employee> employees) {
+        int batchSize = 20; // or fetch from properties
+        for (int i = 0; i < employees.size(); i++) {
+            employeeRepository.save(employees.get(i));
+            if (i % batchSize == 0 && i > 0) {
+                employeeRepository.flush(); // Clear session to manage memory
+            }
+        }
+        employeeRepository.flush();
+    }
+}
