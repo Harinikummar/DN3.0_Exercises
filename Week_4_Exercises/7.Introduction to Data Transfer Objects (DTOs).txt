@@ -1,0 +1,313 @@
+7.Exercise: Online Bookstore - Introduction to Data Transfer Objects (DTOs)
+
+BookDTO:
+
+package com.example.BookstoreAPI.dto;
+
+public class BookDTO {
+    private Long id;
+    private String title;
+    private String author;
+    private double price;
+    private String isbn;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+}
+
+CustomerDTO:
+
+package com.example.BookstoreAPI.dto;
+
+public class CustomerDTO {
+    private Long id;
+    private String name;
+    private String email;
+    private String address;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+}
+
+
+Add dependencies:
+
+<dependency>
+    <groupId>org.mapstruct</groupId>
+    <artifactId>mapstruct</artifactId>
+    <version>1.5.3.Final</version>
+</dependency>
+<dependency>
+    <groupId>org.mapstruct</groupId>
+    <artifactId>mapstruct-processor</artifactId>
+    <version>1.5.3.Final</version>
+    <scope>provided</scope>
+</dependency>
+<dependency>
+    <groupId>org.modelmapper</groupId>
+    <artifactId>modelmapper</artifactId>
+    <version>3.1.0</version>
+</dependency>
+
+
+BookMapper:
+
+package com.example.BookstoreAPI.mapper;
+
+
+import com.example.BookstoreAPI.dto.BookDTO;
+import com.example.BookstoreAPI.model.Book;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+
+@Mapper
+public interface BookMapper {
+    BookMapper INSTANCE = Mappers.getMapper(BookMapper.class);
+
+    BookDTO bookToBookDTO(Book book);
+    Book bookDTOToBook(BookDTO bookDTO);
+}
+
+
+CustomerMapper:
+
+package com.example.BookstoreAPI.mapper;
+
+
+import com.example.BookstoreAPI.dto.CustomerDTO;
+import com.example.BookstoreAPI.model.Customer;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+
+@Mapper
+public interface CustomerMapper {
+    CustomerMapper INSTANCE = Mappers.getMapper(CustomerMapper.class);
+
+    CustomerDTO customerToCustomerDTO(Customer customer);
+    Customer customerDTOToCustomer(CustomerDTO customerDTO);
+}
+
+
+BookController:
+
+package com.example.bookstoreapi.controller;
+
+import com.example.bookstoreapi.dto.BookDTO;
+import com.example.bookstoreapi.mapper.BookMapper;
+import com.example.bookstoreapi.model.Book;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/books")
+public class BookController {
+
+    private List<Book> bookList = new ArrayList<>();
+
+    // GET all books
+    @GetMapping
+    public List<BookDTO> getAllBooks() {
+        return bookList.stream()
+                .map(BookMapper.INSTANCE::bookToBookDTO)
+                .collect(Collectors.toList());
+    }
+
+    // POST to create a new book
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public BookDTO createBook(@RequestBody BookDTO bookDTO) {
+        Book book = BookMapper.INSTANCE.bookDTOToBook(bookDTO);
+        bookList.add(book);
+        return BookMapper.INSTANCE.bookToBookDTO(book);
+    }
+}
+
+BookDTO:
+
+package com.example.BookstoreAPI.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public class BookDTO {
+    private Long id;
+    private String title;
+    private String author;
+    private double price;
+
+    @JsonIgnore
+    private String isbn;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+}
+
+
+CustomerDTO:
+
+package com.example.BookstoreAPI.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.time.LocalDate;
+
+public class CustomerDTO {
+    private Long id;
+    private String name;
+    private String email;
+    private String address;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate birthdate;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public LocalDate getBirthdate() {
+        return birthdate;
+    }
+
+    public void setBirthdate(LocalDate birthdate) {
+        this.birthdate = birthdate;
+    }
+}

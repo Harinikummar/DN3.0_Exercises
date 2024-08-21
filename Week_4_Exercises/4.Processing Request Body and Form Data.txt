@@ -1,0 +1,95 @@
+Exercise 4: Online Bookstore - Processing Request Body and Form Data
+
+//Create Customer Entity:
+Customer:
+
+package com.example.BookstoreAPI.model;
+
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Customer {
+    private Long id;
+    private String name;
+    private String email;
+    private String address;
+}
+
+
+1. Request Body:
+
+//Create Customer Controller
+CustomerController:
+
+package com.example.BookstoreAPI.controller;
+
+import com.example.BookstoreAPI.model.Customer;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@RestController
+@RequestMapping("/customers")
+public class CustomerController {
+
+    private List<Customer> customerList = new ArrayList<>();
+
+    // POST to create a new customer using JSON request body
+    @PostMapping
+    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
+        customerList.add(customer);
+        return ResponseEntity.status(HttpStatus.CREATED).body(customer);
+    }
+
+}
+
+2. Form Data:
+
+CustomerController:
+
+package com.example.BookstoreAPI.controller;
+
+import com.example.BookstoreAPI.model.Customer;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@RestController
+@RequestMapping("/customers")
+public class CustomerController {
+
+    private List<Customer> customerList = new ArrayList<>();
+
+    // POST to create a new customer using JSON request body
+    @PostMapping
+    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
+        customerList.add(customer);
+        return ResponseEntity.status(HttpStatus.CREATED).body(customer);
+    }
+
+    // POST to process form data for customer registration
+    @PostMapping("/register")
+    public ResponseEntity<Customer> registerCustomer(
+            @RequestParam Long id,
+            @RequestParam String name,
+            @RequestParam String email,
+            @RequestParam String address) {
+
+        Customer customer = new Customer(id, name, email, address);
+        customerList.add(customer);
+        return ResponseEntity.status(HttpStatus.CREATED).body(customer);
+    }
+}
+
+
