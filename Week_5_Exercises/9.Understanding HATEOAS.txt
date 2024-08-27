@@ -1,0 +1,216 @@
+Exercise 9: Online Bookstore - Understanding HATEOAS
+
+BookModel:
+
+package com.example.BookstoreAPI.model;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.hateoas.RepresentationModel;
+
+@Setter
+@Getter
+public class BookModel extends RepresentationModel<BookModel> {
+    private Long id;
+    private String title;
+    private String author;
+    private double price;
+    private String isbn;
+}
+
+
+BookModelAssembler:
+
+package com.example.bookstoreapi.assembler;
+
+import com.example.bookstoreapi.controller.BookController;
+import com.example.bookstoreapi.model.Book;
+import com.example.bookstoreapi.model.BookModel;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
+import org.springframework.stereotype.Component;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+@Component
+public class BookModelAssembler extends RepresentationModelAssemblerSupport<Book, BookModel> {
+
+    public BookModelAssembler() {
+        super(BookController.class, BookModel.class);
+    }
+
+    @Override
+    public BookModel toModel(Book book) {
+        BookModel bookModel = new BookModel();
+        bookModel.setId(book.getId());
+        bookModel.setTitle(book.getTitle());
+        bookModel.setAuthor(book.getAuthor());
+        bookModel.setPrice(book.getPrice());
+        bookModel.setIsbn(book.getIsbn());
+
+        // Add self link
+        bookModel.add(linkTo(methodOn(BookController.class).getBookById(book.getId())).withSelfRel());
+
+        // Add link to all books
+        bookModel.add(linkTo(methodOn(BookController.class).getBooks(null, null)).withRel("books"));
+
+        return bookModel;
+    }
+}
+
+
+BookController:
+
+package com.example.bookstoreapi.controller;
+
+import com.example.bookstoreapi.assembler.BookModelAssembler;
+import com.example.bookstoreapi.model.Book;
+import com.example.bookstoreapi.model.BookModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/books")
+public class BookController {
+
+    private List<Book> bookList = new ArrayList<>();
+
+    @Autowired
+    private BookModelAssembler assembler;
+
+    // GET all books
+    @GetMapping
+    public CollectionModel<BookModel> getBooks(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author) {
+
+        List<BookModel> books = new ArrayList<>();
+        for (Book book : bookList) {
+            books.add(assembler.toModel(book));
+        }
+
+        return CollectionModel.of(books,
+                linkTo(methodOn(BookController.class).getBooks(title, author)).withSelfRel());
+    }
+
+    // GET a book by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<BookModel> getBookById(@PathVariable Long id) {
+        Optional<Book> book = bookList.stream()
+                .filter(b -> b.getId().equals(id))
+                .findFirst();
+
+        return book.map(value -> ResponseEntity.ok(assembler.toModel(value)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+}
+
+CustomerModel:
+
+package com.example.BookstoreAPI.model;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.hateoas.RepresentationModel;
+
+@Setter
+@Getter
+public class CustomerModel extends RepresentationModel<CustomerModel> {
+
+    private Long id;
+    private String name;
+    private String email;
+    private String address;
+
+}
+
+CustomerModelAssembler:
+
+package com.example.BookstoreAPI.assembler;
+
+import com.example.BookstoreAPI.controller.CustomerController;
+import com.example.BookstoreAPI.model.Customer;
+import com.example.BookstoreAPI.model.CustomerModel;
+import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
+import org.springframework.stereotype.Component;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+@Component
+public class CustomerModelAssembler extends RepresentationModelAssemblerSupport<Customer, CustomerModel> {
+
+    public CustomerModelAssembler() {
+        super(CustomerController.class, CustomerModel.class);
+    }
+
+    @Override
+    public CustomerModel toModel(Customer customer) {
+        CustomerModel customerModel = new CustomerModel();
+        customerModel.setId(customer.getId());
+        customerModel.setName(customer.getName());
+        customerModel.setEmail(customer.getEmail());
+        customerModel.setAddress(customer.getAddress());
+
+        // Add self link
+        customerModel.add(linkTo(methodOn(CustomerController.class).getCustomerById(customer.getId())).withSelfRel());
+
+        // Add link to all customers
+        customerModel.add(linkTo(methodOn(CustomerController.class).getCustomers()).withRel("customers"));
+
+        return customerModel;
+    }
+}
+
+CustomerController:
+
+package com.example.bookstoreapi.controller;
+
+import com.example.bookstoreapi.assembler.CustomerModelAssembler;
+import com.example.bookstoreapi.model.Customer;
+import com.example.bookstoreapi.model.CustomerModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/customers")
+public class CustomerController {
+
+    private List<Customer> customerList = new ArrayList<>();
+
+    @Autowired
+    private CustomerModelAssembler assembler;
+
+    // GET all customers
+    @GetMapping
+    public CollectionModel<CustomerModel> getCustomers() {
+        List<CustomerModel> customers = new ArrayList<>();
+        for (Customer customer : customerList) {
+            customers.add(assembler.toModel(customer));
+        }
+
+        return CollectionModel.of(customers,
+                linkTo(methodOn(CustomerController.class).getCustomers()).withSelfRel());
+    }
+
+    // GET a customer by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerModel> getCustomerById(@PathVariable Long id) {
+        Optional<Customer> customer = customerList.stream()
+                .filter(c -> c.getId().equals(id))
+                .findFirst();
+
+        return customer.map(value -> ResponseEntity.ok(assembler.toModel(value)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+}

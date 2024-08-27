@@ -1,0 +1,63 @@
+Exercise 11: Online Bookstore - Integrating Spring Boot Actuator
+
+CustomMetrics:
+
+package com.example.bookstoreapi.metrics;
+
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
+
+public class CustomMetrics {
+
+    private final Counter customCounter;
+
+    public CustomMetrics(MeterRegistry meterRegistry) {
+        this.customCounter = meterRegistry.counter("custom_metric", "type", "example");
+    }
+
+    public void incrementCustomCounter() {
+        customCounter.increment();
+    }
+}
+
+MetricsConfig:
+
+package com.example.bookstoreapi.metrics;
+
+import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class MetricsConfig {
+
+    @Bean
+    public CustomMetrics customMetrics(MeterRegistry meterRegistry) {
+        return new CustomMetrics(meterRegistry);
+    }
+}
+
+
+MetricsController:
+
+package com.example.bookstoreapi.controller;
+
+import com.example.bookstoreapi.metrics.CustomMetrics;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/metrics")
+public class MetricsController {
+
+    @Autowired
+    private CustomMetrics customMetrics;
+
+    @GetMapping("/increment")
+    public String incrementMetric() {
+        customMetrics.incrementCustomCounter();
+        return "Custom metric incremented!";
+    }
+}
