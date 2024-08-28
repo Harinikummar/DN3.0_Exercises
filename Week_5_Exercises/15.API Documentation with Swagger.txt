@@ -1,0 +1,87 @@
+Scenario 15: Online Bookstore - API Documentation with Swagger
+
+Dependencies:
+
+<dependencies>
+    <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-ui</artifactId>
+        <version>1.7.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-webmvc-core</artifactId>
+        <version>1.7.0</version>
+    </dependency>
+</dependencies>
+
+
+BookController:
+
+package com.example.bookstoreapi.controller;
+
+import com.example.bookstoreapi.model.Book;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@Tag(name = "Books", description = "API for managing books in the bookstore")
+@RestController
+@RequestMapping("/books")
+public class BookController {
+
+    private List<Book> bookList = new ArrayList<>();
+
+    @Operation(summary = "Get all books", description = "Retrieve all books or filter by title and/or author")
+    @GetMapping
+    public List<Book> getBooks(
+            @Parameter(description = "Title of the book") @RequestParam(required = false) String title,
+            @Parameter(description = "Author of the book") @RequestParam(required = false) String author) {
+
+        return bookList;
+    }
+
+    @Operation(summary = "Get a book by ID", description = "Retrieve a book by its ID")
+    @GetMapping("/{id}")
+    public ResponseEntity<Book> getBookById(@Parameter(description = "ID of the book to retrieve") @PathVariable Long id) {
+        Optional<Book> book = bookList.stream().filter(b -> b.getId().equals(id)).findFirst();
+        return book.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Create a new book", description = "Add a new book to the bookstore")
+    @PostMapping
+    public ResponseEntity<Book> createBook(@RequestBody Book book) {
+        book.setId((long) (bookList.size() + 1));
+        bookList.add(book);
+        return ResponseEntity.status(201).body(book);
+    }
+
+    @Operation(summary = "Update an existing book", description = "Update details of an existing book")
+    @PutMapping("/{id}")
+    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book book) {
+        Optional<Book> existingBook = bookList.stream().filter(b -> b.getId().equals(id)).findFirst();
+        if (existingBook.isPresent()) {
+            book.setId(id);
+            bookList.set(bookList.indexOf(existingBook.get()), book);
+            return ResponseEntity.ok(book);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(summary = "Delete a book", description = "Remove a book from the bookstore")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+        if (bookList.removeIf(book -> book.getId().equals(id))) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
